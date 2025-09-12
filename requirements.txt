@@ -1,0 +1,7 @@
+flask
+gunicorn
+pandas
+matplotlib
+openpyxl
+pymysql
+xlsxwriter
