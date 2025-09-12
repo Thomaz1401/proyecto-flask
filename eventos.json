@@ -1,0 +1,20 @@
+{
+    "COMPLETECALLER": "Completada por usuario",
+    "COMPLETEAGENT": "Completada por agente",
+    "ABANDON": "Abandonada por cliente",
+    "ENTERQUEUE": "Ingreso a la cola",
+    "EXITWITHTIMEOUT": "Salida por timeout",
+    "EXITWITHKEY": "Salida con tecla",
+    "CONNECT": "Conectada con agente",
+    "RINGNOANSWER": "No contestada por agente",
+    "TRANSFER": "Transferida",
+    "AGENTLOGIN": "Agente logueado",
+    "AGENTLOGOFF": "Agente deslogueado",
+    "AGENTCALLBACKLOGIN": "Agente callback logueado",
+    "AGENTCALLBACKLOGOFF": "Agente callback deslogueado",
+    "AGENTDUMP": "Llamada rechazada por agente",
+    "CONFIGRELOAD": "Configuración recargada",
+    "EXITEMPTY": "Rechazada por cola vacía",
+    "SYSCOMPAT": "Incompatible de sistema",
+    "QUEUESTART": "Cola iniciada"
+}
