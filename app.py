@@ -10,10 +10,14 @@ import io
 app = Flask(__name__)
 app.secret_key = "mi_clave_secreta"
 
-# Carpeta para guardar uploads (solo se guarda el archivo original que sube el usuario)
-UPLOAD_FOLDER = "uploads"
+# ✅ Carpeta temporal para guardar uploads en Railway
+UPLOAD_FOLDER = "/tmp"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# ✅ Limitar tamaño máximo de archivos (50 MB)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  
+
 ALLOWED_EXTENSIONS = {"txt", "log", "csv"}
 
 def allowed_file(filename):
@@ -81,7 +85,7 @@ def generar_dataframe(filepath):
 
     return df
 
-# ✅ Nueva versión: genera reporte en memoria
+# ✅ Generar reporte en memoria
 def generar_reporte_memoria(df, formato="excel"):
     output = io.BytesIO()
     if formato == "excel":
@@ -180,7 +184,6 @@ def generar(formato):
     df = generar_dataframe(filepath)
     archivo = generar_reporte_memoria(df, formato)
 
-    # ✅ Enviar archivo en memoria
     if formato == "excel":
         return send_file(archivo, as_attachment=True,
                          download_name="reporte.xlsx",
@@ -191,4 +194,4 @@ def generar(formato):
                          mimetype="text/csv")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
