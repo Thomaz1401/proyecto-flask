@@ -5,11 +5,12 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 import json
 import unicodedata
+import io
 
 app = Flask(__name__)
 app.secret_key = "mi_clave_secreta"
 
-# Carpeta para guardar uploads
+# Carpeta para guardar uploads (solo se guarda el archivo original que sube el usuario)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -80,19 +81,17 @@ def generar_dataframe(filepath):
 
     return df
 
-def generar_reporte(df, formato="excel", base_name="reporte_queue_log"):
-    fecha_actual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
+# ✅ Nueva versión: genera reporte en memoria
+def generar_reporte_memoria(df, formato="excel"):
+    output = io.BytesIO()
     if formato == "excel":
-        nombre_salida = f"{base_name}_{fecha_actual}.xlsx"
-        with pd.ExcelWriter(nombre_salida, engine="xlsxwriter") as writer:
+        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
             df.to_excel(writer, sheet_name="Reporte", index=False)
     else:
-        nombre_salida = f"{base_name}_{fecha_actual}.csv"
-        # ✅ Forzar UTF-8 con BOM para Excel
-        df.to_csv(nombre_salida, index=False, encoding="utf-8-sig")
+        output.write(df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig"))
 
-    return nombre_salida
+    output.seek(0)
+    return output
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -179,9 +178,17 @@ def generar(formato):
         return "❌ Primero debes subir un archivo.", 400
 
     df = generar_dataframe(filepath)
-    base_name = os.path.splitext(os.path.basename(filepath))[0] + "_reporte"
-    archivo = generar_reporte(df, formato, base_name)
-    return send_file(archivo, as_attachment=True)
+    archivo = generar_reporte_memoria(df, formato)
+
+    # ✅ Enviar archivo en memoria
+    if formato == "excel":
+        return send_file(archivo, as_attachment=True,
+                         download_name="reporte.xlsx",
+                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    else:
+        return send_file(archivo, as_attachment=True,
+                         download_name="reporte.csv",
+                         mimetype="text/csv")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
